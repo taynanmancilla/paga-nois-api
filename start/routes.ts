@@ -10,6 +10,7 @@
 import AuthController from '#controllers/auth_controller'
 import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
+import GruposController from '#controllers/grupos_controller'
 
 router.get('/', async () => {
   return {
@@ -27,3 +28,5 @@ router.group(() => {
   router.post('/registrar', [AuthController, 'registro'])
   router.post('/login', [AuthController, 'login'])
 }).prefix('usuarios')
+
+router.resource('grupos', GruposController).apiOnly().use('*', middleware.auth())

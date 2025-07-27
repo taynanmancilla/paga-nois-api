@@ -10,7 +10,8 @@ export const validadorRegistro = vine.compile(
       
       return !user;
     }),
-    senha: vine.string().minLength(8)
+    senha: vine.string().minLength(8),
+    nome: vine.string().maxLength(255)
   })
 )
 
