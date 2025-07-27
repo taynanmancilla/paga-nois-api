@@ -7,7 +7,7 @@ vine.messagesProvider = new SimpleMessagesProvider({
   'email': 'O endereço de email digitado não é valido',
   'alphaNumeric': 'Apenas letras e números no nome do seu grupo',
   'maxLength': 'O campo {{field}} é muito grande',
-  'database.unique': 'Você ja possui um {{field}} com esse valor',
+  'database.unique': 'Esse {{field}} ja esta em uso',
 
   // Error message for the username field
   'username.required': 'Escolha um nome de usuário para sua conta',

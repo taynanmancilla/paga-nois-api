@@ -1,12 +1,27 @@
 import Usuario from '#models/usuario';
-import { validadorCriarGrupo } from '#validators/grupo';
+import Grupo from '#models/grupo';
+import { validadorCriarGrupo, validadorAtualizarGrupo } from '#validators/grupo';
 import type { HttpContext } from '@adonisjs/core/http'
 
 export default class GruposController {
-  /**
-   * Display a list of resource
-   */
-  async index({}: HttpContext) {}
+  async index({ auth }: HttpContext) {
+    const usuario = await Usuario.findBy('id', auth.user!.id);
+    if (!usuario) {
+      return {
+        sucesso: false,
+        mensagem: 'Usuário não encontrado'
+      };
+    }
+    const grupos = await usuario.related('grupos').query()
+
+    return {
+      sucesso: true,
+      grupos: grupos.map(grupo => ({
+        id: grupo.id,
+        nome: grupo.nome
+      }))
+    }
+  }
 
   async store({ request, auth }: HttpContext) {
     const data = await request.validateUsing(validadorCriarGrupo, {
@@ -24,24 +39,60 @@ export default class GruposController {
     if (grupo) {
       return {
         sucesso: true,
-        mensagem: `Grupo "${grupo.nome}" criado com sucesso!`,
+        mensagem: `Grupo ${grupo.nome} criado com sucesso!`,
         grupoId: grupo.id
       }
     }
   }
 
-  /**
-   * Show individual record
-   */
-  async show({ params }: HttpContext) {}
+  async update({ params, request, auth }: HttpContext) {
+    const grupo = await Grupo.findBy('id', params.id)
+    if (!grupo) {
+      return {
+        sucesso: false,
+        mensagem: 'Grupo não encontrado'
+      }
+    }
+    const data = await request.validateUsing(validadorAtualizarGrupo, {
+      meta: {
+        usuarioId: auth.user?.id
+      }
+    })
+    
+    grupo.merge(data)
+    await grupo.save()
 
-  /**
-   * Handle form submission for the edit action
-   */
-  async update({ params, request }: HttpContext) {}
+    return {
+      sucesso: true,
+      mensagem: `Grupo ${grupo.nome} atualizado com sucesso!`,
+      grupoId: grupo.id
+    }
+  }
 
-  /**
-   * Delete record
-   */
-  async destroy({ params }: HttpContext) {}
+  async destroy({ params, auth }: HttpContext) {
+    const usuario = await Usuario.findBy('id', auth.user!.id)
+    if (!usuario) {
+      return {
+        sucesso: false,
+        mensagem: 'Usuário não encontrado'
+      }
+    }
+
+    const grupo = await usuario.related('grupos').query().where('grupos.id', params.id).first()
+    if (!grupo) {
+      return {
+        sucesso: false,
+        mensagem: 'Grupo não encontrado'
+      }
+    }
+
+    await usuario.related('grupos').detach([grupo.id])
+    
+    await grupo.delete()
+
+    return {
+      sucesso: true,
+      mensagem: `Grupo ${grupo.nome} deletado com sucesso!`
+    }
+  }
 }
