@@ -12,6 +12,8 @@ import router from '@adonisjs/core/services/router'
 import { middleware } from './kernel.js'
 import GruposController from '#controllers/grupos_controller'
 import MembrosController from '#controllers/membros_controller'
+import DespesasController from '#controllers/despesas_controller'
+import PagamentosController from '#controllers/pagamentos_controller'
 
 router.get('/', async () => {
   return {
@@ -36,4 +38,11 @@ router.group(() => {
   router.post(':id/membros', [MembrosController, 'adicionarMembro'])
   router.get(':id/membros', [MembrosController, 'listarMembros'])
   router.delete(':id/membros', [MembrosController, 'removerMembro'])
+  router.get('/:id/dashboards', [DespesasController, 'dashboard'])
 }).prefix('grupos').use(middleware.auth())
+
+router.post('/despesas', [DespesasController, 'store']).use(middleware.auth())
+router.put('/despesas/:id', [DespesasController, 'update']).use(middleware.auth())
+router.delete('/despesas/:id', [DespesasController, 'destroy']).use(middleware.auth())
+
+router.post('/pagamentos', [PagamentosController, 'store']).use(middleware.auth())
